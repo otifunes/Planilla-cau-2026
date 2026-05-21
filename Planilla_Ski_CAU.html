@@ -474,7 +474,7 @@
 
 <script>
 // ── DATOS ──────────────────────────────────────────────
-const DISCIPLINAS = ['SL','GS','SG','Educativos','Juegos/Lúdico','Freeride','Freestyle','Recreativo','Esquí Libre'];
+const DISCIPLINAS = ['SL','GS','SG','Educativos','Juegos/Lúdico','Freeride','Freestyle','Recreativo','Esquí Libre','Viajes','Eventos','Carreras','Día Libre'];
 
 const MESES = [
   { nombre: 'Junio', inicio: new Date(2026,5,27), fin: new Date(2026,5,30) },
@@ -514,6 +514,7 @@ function saveTurno(dateKey, turno, field, value) {
   data[field] = value;
   setData(key, data);
   updateTotalBajadas();
+  setTimeout(() => syncToSheets(dateKey, turno), 500);
 }
 
 function getTurno(dateKey, turno) {
@@ -745,6 +746,35 @@ function showPanel(panel) {
   document.getElementById('btnPlanilla').className = 'nav-btn' + (panel==='planilla'?' active':'');
   document.getElementById('btnStats').className = 'nav-btn' + (panel==='stats'?' active':'');
   if (panel === 'stats') buildStats();
+}
+
+// ── SYNC ──────────────────────────────────────────────
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHkks7yDcY6mpNd2Jnb9OVSkRQNnzMKxj5caj7NZoCOZGt-LScDD2vcJr7tQ1bG8Zb/exec';
+
+function syncToSheets(dk, turno) {
+  const mes = MESES[mesActivo];
+  const dia = getDias(mes.inicio, mes.fin).find(d => dateKey(d) === dk);
+  if (!dia) return;
+  const data = getTurno(dk, turno);
+  const profe = getData('profe') || '';
+  const payload = {
+    profe: profe,
+    fecha: `${dia.getDate()}/${dia.getMonth()+1}/${dia.getFullYear()}`,
+    mes: mes.nombre,
+    turno: turno === 'tm' ? 'Mañana' : 'Tarde',
+    disc1: data.disc1 || '',
+    baj1: parseInt(data.baj1) || 0,
+    disc2: data.disc2 || '',
+    baj2: parseInt(data.baj2) || 0,
+    disc3: data.disc3 || '',
+    baj3: parseInt(data.baj3) || 0,
+    obs: data.obs || ''
+  };
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }).catch(() => {});
 }
 
 // ── INIT ──────────────────────────────────────────────
