@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0D2137">
+<title>Planilla Ski CAU</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --azul: #0D2137;
+    --azul-med: #1A3C5E;
+    --azul-clar: #2A5B8C;
+    --naranja: #E8610A;
+    --nar-clar: #FDE9D9;
+    --blanco: #FFFFFF;
+    --gris: #F4F6F8;
+    --gris-med: #E2E8EF;
+    --gris-text: #6B7A8D;
+    --verde: #2D7D46;
+    --rojo: #C0392B;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(13,33,55,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--gris);
+    color: var(--azul);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--azul);
+    color: var(--blanco);
+    padding: 16px 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .app-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .app-subtitle {
+    font-size: 11px;
+    opacity: 0.6;
+    font-weight: 400;
+  }
+
+  .btn-stats {
+    background: var(--naranja);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Tabs de meses */
+  .month-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 0;
+    scrollbar-width: none;
+  }
+  .month-tabs::-webkit-scrollbar { display: none; }
+
+  .month-tab {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .month-tab.active {
+    background: var(--gris);
+    color: var(--azul);
+  }
+
+  /* ── CONTENIDO ── */
+  .content { padding: 12px; }
+
+  /* Selector de profe */
+  .profe-bar {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .profe-bar label { font-size: 13px; font-weight: 600; color: var(--gris-text); white-space: nowrap; }
+  .profe-bar input {
+    flex: 1;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--azul);
+    outline: none;
+    background: transparent;
+  }
+
+  /* Contador de días */
+  .dias-counter {
+    background: var(--naranja);
+    color: white;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .dias-counter span { font-size: 22px; font-weight: 700; }
+
+  /* ── CARDS DE DÍA ── */
+  .dia-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .dia-header {
+    background: var(--azul);
+    color: white;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .dia-fecha {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .dia-day {
+    font-size: 11px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .dia-badge {
+    background: var(--naranja);
+    color: white;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Turno */
+  .turno-section {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--gris-med);
+  }
+  .turno-section:last-child { border-bottom: none; }
+
+  .turno-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .turno-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--naranja);
+  }
+  .turno-tarde .turno-dot { background: var(--azul-clar); }
+
+  .turno-nombre {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gris-text);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* Grid de campos */
+  .campos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .campo label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gris-text);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .campo select,
+  .campo input {
+    border: 1.5px solid var(--gris-med);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--azul);
+    background: var(--gris);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .campo select:focus,
+  .campo input:focus {
+    border-color: var(--naranja);
+    background: white;
+  }
+
+  .campo input[type="number"] {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+
+  .campo-obs {
+    grid-column: 1 / -1;
+  }
+
+  .campo-obs textarea {
+    border: 1.5px solid var(--gris-med);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--azul);
+    background: var(--gris);
+    outline: none;
+    width: 100%;
+    resize: none;
+    min-height: 52px;
+    transition: border-color 0.2s;
+  }
+  .campo-obs textarea:focus {
+    border-color: var(--naranja);
+    background: white;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--blanco);
+    border-top: 1px solid var(--gris-med);
+    display: flex;
+    padding: 8px 0 env(safe-area-inset-bottom);
+    z-index: 200;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gris-text);
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--naranja); }
+  .nav-icon { font-size: 20px; }
+
+  /* ── ESTADÍSTICAS ── */
+  .stats-panel {
+    display: none;
+    padding: 12px;
+  }
+  .stats-panel.visible { display: block; }
+
+  .stats-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--azul);
+    margin-bottom: 16px;
+  }
+
+  .stats-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .stats-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gris-text);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gris-med);
+  }
+  .stat-row:last-child { border-bottom: none; }
+
+  .stat-disc { font-size: 14px; font-weight: 500; }
+
+  .stat-vals {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .stat-val {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+  }
+
+  .stat-val span:first-child {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    color: var(--naranja);
+  }
+
+  .stat-val span:last-child {
+    font-size: 9px;
+    color: var(--gris-text);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .total-box {
+    background: var(--azul);
+    border-radius: var(--radius);
+    padding: 16px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .total-box .label { font-size: 13px; opacity: 0.7; }
+  .total-box .val { font-size: 32px; font-weight: 700; font-family: 'DM Mono', monospace; }
+
+  .mes-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .mes-stat-card {
+    background: var(--blanco);
+    border-radius: var(--radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+
+  .mes-stat-card .mes-nombre { font-size: 11px; font-weight: 700; color: var(--gris-text); text-transform: uppercase; }
+  .mes-stat-card .mes-val { font-size: 24px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--naranja); }
+  .mes-stat-card .mes-label { font-size: 10px; color: var(--gris-text); }
+
+  /* ── OVERLAY MODAL ── */
+  .panel { display: none; }
+  .panel.visible { display: block; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-top">
+    <div>
+      <div class="app-title">⛷ Planilla CAU 2026</div>
+      <div class="app-subtitle">Escuela de Ski Alpino</div>
+    </div>
+  </div>
+  <div class="month-tabs" id="monthTabs"></div>
+</div>
+
+<div id="planillaPanel" class="panel visible">
+  <div class="content">
+    <div class="profe-bar">
+      <label>Profe:</label>
+      <input type="text" id="nombreProfe" placeholder="Tu nombre..." oninput="saveProfe()">
+    </div>
+    <div class="dias-counter">
+      <div>Bajadas registradas</div>
+      <span id="totalBajadas">0</span>
+    </div>
+    <div id="diasContainer"></div>
+  </div>
+</div>
+
+<div id="statsPanel" class="panel">
+  <div class="content stats-panel visible">
+    <div class="stats-title">📊 Estadísticas</div>
+    <div id="statsContent"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="btnPlanilla" onclick="showPanel('planilla')">
+    <span class="nav-icon">📋</span>
+    Planilla
+  </button>
+  <button class="nav-btn" id="btnStats" onclick="showPanel('stats')">
+    <span class="nav-icon">📊</span>
+    Estadísticas
+  </button>
+</nav>
+
+<script>
+// ── DATOS ──────────────────────────────────────────────
+const DISCIPLINAS = ['SL','GS','SG','Educativos','Juegos/Lúdico','Freeride','Freestyle','Recreativo','Esquí Libre'];
+
+const MESES = [
+  { nombre: 'Junio', inicio: new Date(2026,5,27), fin: new Date(2026,5,30) },
+  { nombre: 'Julio', inicio: new Date(2026,6,1),  fin: new Date(2026,6,31) },
+  { nombre: 'Agosto', inicio: new Date(2026,7,1), fin: new Date(2026,7,31) },
+  { nombre: 'Sept', inicio: new Date(2026,8,1),   fin: new Date(2026,8,30) },
+];
+
+const DIAS_SEMANA = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+let mesActivo = 0;
+
+function getDias(inicio, fin) {
+  const dias = [];
+  let d = new Date(inicio);
+  while (d <= fin) {
+    dias.push(new Date(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return dias;
+}
+
+function dateKey(date) {
+  return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+}
+
+// ── STORAGE ──────────────────────────────────────────────
+function getData(key) {
+  try { return JSON.parse(localStorage.getItem('skiCAU_' + key) || 'null'); } catch { return null; }
+}
+function setData(key, val) {
+  try { localStorage.setItem('skiCAU_' + key, JSON.stringify(val)); } catch {}
+}
+
+function saveTurno(dateKey, turno, field, value) {
+  const key = `dia_${dateKey}_${turno}`;
+  const data = getData(key) || {};
+  data[field] = value;
+  setData(key, data);
+  updateTotalBajadas();
+}
+
+function getTurno(dateKey, turno) {
+  return getData(`dia_${dateKey}_${turno}`) || {};
+}
+
+function saveProfe() {
+  setData('profe', document.getElementById('nombreProfe').value);
+}
+
+// ── RENDER ──────────────────────────────────────────────
+function buildTabs() {
+  const cont = document.getElementById('monthTabs');
+  cont.innerHTML = '';
+  MESES.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'month-tab' + (i === mesActivo ? ' active' : '');
+    btn.textContent = m.nombre;
+    btn.onclick = () => { mesActivo = i; buildTabs(); buildDias(); };
+    cont.appendChild(btn);
+  });
+}
+
+function selectHtml(name, val) {
+  let opts = '<option value="">—</option>';
+  DISCIPLINAS.forEach(d => {
+    opts += `<option value="${d}"${val===d?' selected':''}>${d}</option>`;
+  });
+  return `<select name="${name}">${opts}</select>`;
+}
+
+function buildDias() {
+  const cont = document.getElementById('diasContainer');
+  cont.innerHTML = '';
+  const mes = MESES[mesActivo];
+  const dias = getDias(mes.inicio, mes.fin);
+
+  dias.forEach(dia => {
+    const dk = dateKey(dia);
+    const diaNom = DIAS_SEMANA[dia.getDay()];
+    const tm = getTurno(dk, 'tm');
+    const tt = getTurno(dk, 'tt');
+
+    const card = document.createElement('div');
+    card.className = 'dia-card';
+    card.innerHTML = `
+      <div class="dia-header">
+        <div>
+          <div class="dia-fecha">${dia.getDate()} ${mes.nombre.toUpperCase()}</div>
+          <div class="dia-day">${diaNom}</div>
+        </div>
+        <div class="dia-badge">${totalBajadasDia(tm, tt)}</div>
+      </div>
+
+      <!-- MAÑANA -->
+      <div class="turno-section">
+        <div class="turno-label">
+          <div class="turno-dot"></div>
+          <div class="turno-nombre">Mañana</div>
+        </div>
+        <div class="campos-grid">
+          ${campoSelect(dk,'tm','disc1',tm.disc1,'Disciplina 1')}
+          ${campoNum(dk,'tm','baj1',tm.baj1,'Bajadas 1')}
+          ${campoSelect(dk,'tm','disc2',tm.disc2,'Disciplina 2')}
+          ${campoNum(dk,'tm','baj2',tm.baj2,'Bajadas 2')}
+          ${campoSelect(dk,'tm','disc3',tm.disc3,'Disciplina 3')}
+          ${campoNum(dk,'tm','baj3',tm.baj3,'Bajadas 3')}
+          <div class="campo campo-obs">
+            <label>Observaciones</label>
+            <textarea placeholder="Notas del día..." onchange="saveTurno('${dk}','tm','obs',this.value)">${tm.obs||''}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARDE -->
+      <div class="turno-section turno-tarde">
+        <div class="turno-label">
+          <div class="turno-dot"></div>
+          <div class="turno-nombre">Tarde</div>
+        </div>
+        <div class="campos-grid">
+          ${campoSelect(dk,'tt','disc1',tt.disc1,'Disciplina 1')}
+          ${campoNum(dk,'tt','baj1',tt.baj1,'Bajadas 1')}
+          ${campoSelect(dk,'tt','disc2',tt.disc2,'Disciplina 2')}
+          ${campoNum(dk,'tt','baj2',tt.baj2,'Bajadas 2')}
+          ${campoSelect(dk,'tt','disc3',tt.disc3,'Disciplina 3')}
+          ${campoNum(dk,'tt','baj3',tt.baj3,'Bajadas 3')}
+          <div class="campo campo-obs">
+            <label>Observaciones</label>
+            <textarea placeholder="Notas del día..." onchange="saveTurno('${dk}','tt','obs',this.value)">${tt.obs||''}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Eventos de selects e inputs
+    card.querySelectorAll('select').forEach(sel => {
+      sel.addEventListener('change', e => {
+        const [,dkk,turno,field] = e.target.id.split('|');
+        saveTurno(dkk, turno, field, e.target.value);
+        // actualizar badge
+        const tm2 = getTurno(dkk,'tm'), tt2 = getTurno(dkk,'tt');
+        card.querySelector('.dia-badge').textContent = totalBajadasDia(tm2, tt2);
+      });
+    });
+
+    card.querySelectorAll('input[type=number]').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const [,dkk,turno,field] = e.target.id.split('|');
+        saveTurno(dkk, turno, field, parseInt(e.target.value)||0);
+        const tm2 = getTurno(dkk,'tm'), tt2 = getTurno(dkk,'tt');
+        card.querySelector('.dia-badge').textContent = totalBajadasDia(tm2, tt2);
+      });
+    });
+
+    cont.appendChild(card);
+  });
+
+  updateTotalBajadas();
+}
+
+function campoSelect(dk, turno, field, val, label) {
+  const id = `|${dk}|${turno}|${field}`;
+  let opts = `<option value="">—</option>`;
+  DISCIPLINAS.forEach(d => opts += `<option value="${d}"${val===d?' selected':''}>${d}</option>`);
+  return `<div class="campo"><label>${label}</label><select id="${id}">${opts}</select></div>`;
+}
+
+function campoNum(dk, turno, field, val, label) {
+  const id = `|${dk}|${turno}|${field}`;
+  return `<div class="campo"><label>${label}</label><input type="number" id="${id}" min="0" placeholder="0" value="${val||''}"></div>`;
+}
+
+function totalBajadasDia(tm, tt) {
+  const b = n => parseInt(n)||0;
+  return b(tm.baj1)+b(tm.baj2)+b(tm.baj3)+b(tt.baj1)+b(tt.baj2)+b(tt.baj3);
+}
+
+function updateTotalBajadas() {
+  let total = 0;
+  const mes = MESES[mesActivo];
+  getDias(mes.inicio, mes.fin).forEach(dia => {
+    const dk = dateKey(dia);
+    const tm = getTurno(dk,'tm'), tt = getTurno(dk,'tt');
+    total += totalBajadasDia(tm, tt);
+  });
+  document.getElementById('totalBajadas').textContent = total;
+}
+
+// ── ESTADÍSTICAS ──────────────────────────────────────────
+function buildStats() {
+  const cont = document.getElementById('statsContent');
+  cont.innerHTML = '';
+
+  // Calcular totales por disciplina y por mes
+  const byDisc = {};
+  const byMes = {};
+  let totalGlobal = 0;
+
+  DISCIPLINAS.forEach(d => byDisc[d] = { bajadas: 0, sesiones: 0 });
+  MESES.forEach(m => byMes[m.nombre] = 0);
+
+  MESES.forEach(mes => {
+    getDias(mes.inicio, mes.fin).forEach(dia => {
+      const dk = dateKey(dia);
+      ['tm','tt'].forEach(turno => {
+        const data = getTurno(dk, turno);
+        [['disc1','baj1'],['disc2','baj2'],['disc3','baj3']].forEach(([df, bf2]) => {
+          const disc = data[df], baj = parseInt(data[bf2])||0;
+          if (disc && byDisc[disc] !== undefined) {
+            byDisc[disc].bajadas += baj;
+            if (baj > 0 || disc) byDisc[disc].sesiones++;
+          }
+          byMes[mes.nombre] = (byMes[mes.nombre]||0) + baj;
+          totalGlobal += baj;
+        });
+      });
+    });
+  });
+
+  // Total global
+  const totalBox = document.createElement('div');
+  totalBox.className = 'total-box';
+  totalBox.innerHTML = `<div><div class="label">Total bajadas</div><div class="label">temporada completa</div></div><div class="val">${totalGlobal}</div>`;
+  cont.appendChild(totalBox);
+
+  // Por mes
+  const mesGrid = document.createElement('div');
+  mesGrid.className = 'mes-stats';
+  MESES.forEach(m => {
+    const c = document.createElement('div');
+    c.className = 'mes-stat-card';
+    c.innerHTML = `<div class="mes-nombre">${m.nombre}</div><div class="mes-val">${byMes[m.nombre]||0}</div><div class="mes-label">bajadas</div>`;
+    mesGrid.appendChild(c);
+  });
+  cont.appendChild(mesGrid);
+
+  // Por disciplina
+  const discCard = document.createElement('div');
+  discCard.className = 'stats-card';
+  discCard.innerHTML = '<h3>Bajadas por disciplina</h3>';
+
+  const sorted = DISCIPLINAS.filter(d => byDisc[d].bajadas > 0)
+    .sort((a,b) => byDisc[b].bajadas - byDisc[a].bajadas);
+
+  if (sorted.length === 0) {
+    discCard.innerHTML += '<p style="color:var(--gris-text);font-size:14px;text-align:center;padding:16px">Aún no hay datos cargados</p>';
+  } else {
+    sorted.forEach(disc => {
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      row.innerHTML = `
+        <div class="stat-disc">${disc}</div>
+        <div class="stat-vals">
+          <div class="stat-val"><span>${byDisc[disc].bajadas}</span><span>bajadas</span></div>
+          <div class="stat-val"><span>${byDisc[disc].sesiones}</span><span>sesiones</span></div>
+        </div>
+      `;
+      discCard.appendChild(row);
+    });
+  }
+  cont.appendChild(discCard);
+}
+
+// ── NAVEGACIÓN ──────────────────────────────────────────
+function showPanel(panel) {
+  document.getElementById('planillaPanel').className = 'panel' + (panel==='planilla'?' visible':'');
+  document.getElementById('statsPanel').className = 'panel' + (panel==='stats'?' visible':'');
+  document.getElementById('btnPlanilla').className = 'nav-btn' + (panel==='planilla'?' active':'');
+  document.getElementById('btnStats').className = 'nav-btn' + (panel==='stats'?' active':'');
+  if (panel === 'stats') buildStats();
+}
+
+// ── INIT ──────────────────────────────────────────────
+window.onload = () => {
+  const profe = getData('profe');
+  if (profe) document.getElementById('nombreProfe').value = profe;
+  buildTabs();
+  buildDias();
+};
+</script>
+</body>
+</html>
